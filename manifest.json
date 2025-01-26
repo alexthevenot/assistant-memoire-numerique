@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Assistant de Mémoire Numérique",
+  "version": "1.0",
+  "description": "Capture et organise des URL avec des tags.",
+  "permissions": ["tabs", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "assistant.memoire@exemple.com",
+      "strict_min_version": "89.0"
+    }
+  }
+}

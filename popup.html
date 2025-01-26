@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assistant de Mémoire</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 10px;
+      width: 300px;
+    }
+    input, button {
+      margin: 5px 0;
+      width: 100%;
+    }
+    .entry {
+      margin: 5px 0;
+      padding: 5px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .entry button {
+      background-color: red;
+      color: white;
+      border: none;
+      padding: 3px 5px;
+      cursor: pointer;
+    }
+    .entry button:hover {
+      background-color: darkred;
+    }
+    .suggestions {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      background: #fff;
+      max-height: 100px;
+      overflow-y: auto;
+      position: absolute;
+      z-index: 10;
+      width: calc(100% - 20px);
+    }
+    .suggestions div {
+      padding: 5px;
+      cursor: pointer;
+    }
+    .suggestions div:hover {
+      background-color: #f0f0f0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Capture d'URL</h2>
+  <p>URL actuelle :</p>
+  <input type="text" id="url" readonly />
+  <p>Tags :</p>
+  <div style="position: relative;">
+    <input type="text" id="tags" placeholder="Ajoutez des tags, séparés par des virgules" autocomplete="off" />
+    <div id="suggestions" class="suggestions"></div>
+  </div>
+  <button id="saveButton">Enregistrer</button>
+  <p id="status" style="color: green;"></p>
+
+  <h3>Filtrer l'historique</h3>
+  <input type="text" id="search" placeholder="Rechercher par mot-clé ou tag" />
+
+  <h3>Historique</h3>
+  <div id="history"></div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
