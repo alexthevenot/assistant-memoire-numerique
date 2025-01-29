@@ -1,0 +1,11 @@
+# Ignorer l'environnement virtuel
+venv/
+
+# Fichiers générés par Python
+*.pyc
+__pycache__/
+
+# Fichiers générés par le système ou les outils
+*.log
+*.csv
+.DS_Store
