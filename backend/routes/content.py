@@ -4,6 +4,7 @@ import csv, os
 import logging
 from marshmallow import Schema, fields, ValidationError
 from extensions import db
+from flask_cors import cross_origin
 
 # Initialisation des logs
 logger = logging.getLogger("ContentRoutes")
