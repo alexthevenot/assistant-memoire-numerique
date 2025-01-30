@@ -35,12 +35,12 @@ def create_app():
     from routes.content import content_bp
     app.register_blueprint(content_bp)
 
-@app.route("/")
-def home():
-    return {"message": "API Flask est en ligne 🚀"}, 200
+    @app.route("/")
+    def home():
+        return {"message": "API Flask est en ligne 🚀"}, 200
 
     return app
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=10000, debug=True)
