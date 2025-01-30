@@ -3,15 +3,20 @@ document.addEventListener("DOMContentLoaded", () => {
   const tagsField = document.getElementById("tags");
   const saveButton = document.getElementById("saveButton");
   const status = document.getElementById("status");
-  const suggestions = document.getElementById("suggestions");
+  if (!status) {
+    console.error("❌ Erreur : Élément 'status' introuvable !");
+  } else {
+    console.log("✅ Élément 'status' trouvé !");
+  }
   
+  const suggestions = document.getElementById("suggestions");
   if (!suggestions) {
     console.error("❌ Erreur : Élément 'suggestions' introuvable !");
   } else {
     console.log("✅ Élément 'suggestions' trouvé !");
   }
 
-  const API_URL = "http://127.0.0.1:5000"; // URL du backend Flask
+  const API_URL = "https://assistant-memoire-numerique.onrender.com"; // URL du backend Flask
 
   // Récupère l'URL de l'onglet actif
   browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
@@ -24,27 +29,27 @@ document.addEventListener("DOMContentLoaded", () => {
   // Envoie une requête POST pour enregistrer les données
   async function saveData(url, tags) {
     try {
-      const response = await fetch(`${API_URL}/save`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url, tags }),
-      });
-      if (response.ok) {
-        status.textContent = "Enregistré avec succès !";
-        tagsField.value = "";
-      } else {
-        status.textContent = "Erreur lors de l'enregistrement.";
-      }
+        const response = await fetch(`${API_URL}/save`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, tags }),
+        });
+
+        if (response.ok) {
+            if (status) status.textContent = "📌 Enregistré avec succès !";
+            tagsField.value = "";
+        } else {
+            if (status) status.textContent = "❌ Erreur lors de l'enregistrement.";
+        }
     } catch (error) {
-      console.error("Erreur lors de la connexion au backend :", error);
-      status.textContent = "Impossible de se connecter au serveur.";
+        console.error("Erreur lors de la connexion au backend :", error);
+        if (status) status.textContent = "⚠️ Impossible de se connecter au serveur.";
     }
+
     setTimeout(() => {
-      status.textContent = "";
+        if (status) status.textContent = "";
     }, 3000);
-  }
+}
 
   // Récupère les données pour les suggestions de tags
   async function fetchTags() {
