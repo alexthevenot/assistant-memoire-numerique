@@ -4,6 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveButton = document.getElementById("saveButton");
   const status = document.getElementById("status");
   const suggestions = document.getElementById("suggestions");
+  
+  if (!suggestions) {
+    console.error("❌ Erreur : Élément 'suggestions' introuvable !");
+  } else {
+    console.log("✅ Élément 'suggestions' trouvé !");
+  }
 
   const API_URL = "http://127.0.0.1:5000"; // URL du backend Flask
 
@@ -63,21 +69,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Met à jour les suggestions de tags dynamiquement
   async function updateSuggestions(input) {
+    if (!suggestions) return; // ✅ Évite l'erreur si `suggestions` est null
+
     const allTags = await fetchTags();
     const filteredTags = allTags.filter(tag => tag.toLowerCase().startsWith(input.toLowerCase()));
+    
     suggestions.innerHTML = "";
+    
+    if (filteredTags.length === 0) {
+        suggestions.style.display = "none"; // 🔹 Cache les suggestions si aucune correspondance
+        return;
+    }
+
     filteredTags.forEach(tag => {
-      const suggestionDiv = document.createElement("div");
-      suggestionDiv.textContent = tag;
-      suggestionDiv.addEventListener("click", () => {
-        const currentTags = tagsField.value.split(",").slice(0, -1).map(tag => tag.trim());
-        currentTags.push(tag);
-        tagsField.value = currentTags.join(", ") + ", ";
-        suggestions.innerHTML = "";
-      });
-      suggestions.appendChild(suggestionDiv);
+        const suggestionDiv = document.createElement("div");
+        suggestionDiv.textContent = tag;
+        suggestionDiv.style.cursor = "pointer";
+        suggestionDiv.style.padding = "5px";
+        suggestionDiv.style.borderBottom = "1px solid #ddd";
+
+        suggestionDiv.addEventListener("click", () => {
+            const currentTags = tagsField.value.split(",").slice(0, -1).map(tag => tag.trim());
+            currentTags.push(tag);
+            tagsField.value = currentTags.join(", ") + ", ";
+            suggestions.innerHTML = "";
+            suggestions.style.display = "none"; // 🔹 Cache après sélection
+        });
+
+        suggestions.appendChild(suggestionDiv);
     });
+
+    suggestions.style.display = "block"; // 🔹 Affiche les suggestions quand elles existent
   }
+
 
   // Sauvegarde l'URL et les tags en appelant l'API
   saveButton.addEventListener("click", () => {
@@ -110,4 +134,10 @@ document.addEventListener("DOMContentLoaded", () => {
       suggestions.innerHTML = "";
     }
   });
+  
+  document.getElementById("openFront").addEventListener("click", function() {
+    const frontendURL = "https://assistant-memoire-frontend.vercel.app/"; // Remplace par l’URL de ton front React
+    browser.tabs.create({ url: frontendURL });
+  });
+
 });

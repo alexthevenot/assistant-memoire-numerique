@@ -1,50 +1,23 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Assistant de Mémoire</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 10px;
-      width: 300px;
-    }
-    input, button {
-      margin: 5px 0;
-      width: 100%;
-    }
-    .suggestions {
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      background: #fff;
-      max-height: 100px;
-      overflow-y: auto;
-      position: absolute;
-      z-index: 10;
-      width: calc(100% - 20px);
-    }
-    .suggestions div {
-      padding: 5px;
-      cursor: pointer;
-    }
-    .suggestions div:hover {
-      background-color: #f0f0f0;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Extension Assistant Mémoire</title>
+    <style>
+        body { font-family: Arial, sans-serif; width: 250px; padding: 10px; }
+        button { width: 100%; padding: 10px; margin-top: 10px; cursor: pointer; }
+    </style>
 </head>
 <body>
-  <h2>Capture d'URL</h2>
-  <p>URL actuelle :</p>
-  <input type="text" id="url" readonly />
-  <p>Tags :</p>
-  <div style="position: relative;">
-    <input type="text" id="tags" placeholder="Ajoutez des tags, séparés par des virgules" autocomplete="off" />
-    <div id="suggestions" class="suggestions"></div>
-  </div>
-  <button id="saveButton">Enregistrer</button>
-  <p id="status" style="color: green;"></p>
+    <h3>Ajouter une URL</h3>
+    <input type="text" id="url" placeholder="URL" style="width: 100%; padding: 5px;">
+    <input type="text" id="tags" placeholder="Tags (séparés par des virgules)" style="width: 100%; padding: 5px;">
+	<div id="suggestions" style="border: 1px solid #ddd; padding: 5px; margin-top: 5px; display: none;"></div>
+    <button id="saveButton">📌 Sauvegarder</button>
 
-  <script src="popup.js"></script>
+    <hr>
+    <button id="openFront">📂 Voir les liens sauvegardés</button>
+
+    <script src="popup.js"></script>
 </body>
 </html>

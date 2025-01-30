@@ -36,6 +36,7 @@ def save_content():
     return jsonify({"message": "Contenu enregistré avec succès"}), 201
 
 @content_bp.route('/data', methods=['GET'])
+@cross_origin()  # ✅ Autorise toutes les origines pour cette route
 def get_data():
     contents = SavedContent.query.all()
     result = [

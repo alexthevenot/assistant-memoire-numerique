@@ -18,7 +18,7 @@ logger = logging.getLogger("BackendApp")
 
 def create_app():
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": ["https://assistant-memoire-frontend.vercel.app", "moz-extension://*"]}})
 
     # Configuration de la base de données
     app.config.from_object('config.Config')
