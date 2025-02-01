@@ -5,6 +5,7 @@ import logging
 from marshmallow import Schema, fields, ValidationError
 from extensions import db
 from flask_cors import cross_origin
+import requests
 
 # Initialisation des logs
 logger = logging.getLogger("ContentRoutes")
@@ -67,3 +68,37 @@ def export_data():
 
     logger.info("Données exportées dans %s", csv_file)
     return send_file(csv_file, as_attachment=True, mimetype='text/csv')
+    
+# 🔹 Route pour générer un résumé avec OpenAI GPT (ou autre LLM)
+@content_bp.route('/summarize', methods=['POST'])
+def summarize():
+    data = request.json
+    url = data.get("url")
+
+    if not url:
+        return jsonify({"error": "URL manquante"}), 400
+
+    # Exemple de requête vers OpenAI GPT (nécessite une clé API)
+    API_KEY = os.getenv("OPENAI_API_KEY")  # Clé API à ajouter dans Render
+    API_URL = "https://api.openai.com/v1/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    prompt = f"Résumé de l'article disponible à cette adresse : {url}. Donne-moi un résumé court et concis."
+
+    payload = {
+        "model": "gpt-3.5-turbo",
+        "messages": [{"role": "system", "content": prompt}],
+        "temperature": 0.7,
+    }
+
+    response = requests.post(API_URL, headers=headers, json=payload)
+
+    if response.status_code == 200:
+        summary = response.json()["choices"][0]["message"]["content"]
+        return jsonify({"url": url, "summary": summary})
+    else:
+        return jsonify({"error": "Impossible de générer le résumé"}), 500

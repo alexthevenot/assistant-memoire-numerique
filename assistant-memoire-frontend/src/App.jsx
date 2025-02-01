@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "https://assistant-memoire-numerique.onrender.com/data";
+const API_URL = "https://assistant-memoire-numerique.onrender.com";
 
 function App() {
     const [links, setLinks] = useState([]);
@@ -10,11 +10,13 @@ function App() {
     const [selectedTag, setSelectedTag] = useState(null);
     const [sortOrder, setSortOrder] = useState("date-desc");
     const [searchQuery, setSearchQuery] = useState("");
+    const [summaries, setSummaries] = useState({});
+    const [loadingSummary, setLoadingSummary] = useState({});
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const response = await axios.get(API_URL);
+                const response = await axios.get(`${API_URL}/data`);
                 setLinks(response.data);
                 setFilteredLinks(response.data);
 
@@ -67,6 +69,19 @@ function App() {
         );
 
         setFilteredLinks(results);
+    };
+
+    // ✅ Fonction pour générer un résumé avec OpenAI
+    const generateSummary = async (url) => {
+        setLoadingSummary(prev => ({ ...prev, [url]: true }));
+        try {
+            const response = await axios.post(`${API_URL}/summarize`, { url });
+            setSummaries(prev => ({ ...prev, [url]: response.data.summary }));
+        } catch (error) {
+            console.error("Erreur lors de la génération du résumé :", error);
+            setSummaries(prev => ({ ...prev, [url]: "Erreur lors du résumé." }));
+        }
+        setLoadingSummary(prev => ({ ...prev, [url]: false }));
     };
 
     return (
@@ -127,11 +142,27 @@ function App() {
             {/* 🔹 Affichage des liens filtrés et triés */}
             <ul>
                 {filteredLinks.map(link => (
-                    <li key={link.id} style={{ marginBottom: "10px" }}>
+                    <li key={link.id} style={{ marginBottom: "15px", borderBottom: "1px solid #ddd", paddingBottom: "10px" }}>
                         <a href={link.url} target="_blank" rel="noopener noreferrer">
                             {link.url}
                         </a>
                         <p><strong>Tags:</strong> {link.tags.join(", ")}</p>
+
+                        {/* 🔹 Bouton pour générer un résumé */}
+                        <button 
+                            onClick={() => generateSummary(link.url)} 
+                            style={{ padding: "5px", margin: "5px", cursor: "pointer" }}
+                            disabled={loadingSummary[link.url]}
+                        >
+                            {loadingSummary[link.url] ? "⏳ Génération..." : "📄 Générer un résumé"}
+                        </button>
+
+                        {/* 🔹 Affichage du résumé */}
+                        {summaries[link.url] && (
+                            <p style={{ marginTop: "5px", fontStyle: "italic", color: "#555" }}>
+                                {summaries[link.url]}
+                            </p>
+                        )}
                     </li>
                 ))}
             </ul>
