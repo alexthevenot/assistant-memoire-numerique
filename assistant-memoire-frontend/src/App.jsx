@@ -9,6 +9,7 @@ function App() {
     const [tags, setTags] = useState([]);
     const [selectedTag, setSelectedTag] = useState(null);
     const [sortOrder, setSortOrder] = useState("date-desc");
+    const [searchQuery, setSearchQuery] = useState("");
 
     useEffect(() => {
         async function fetchData() {
@@ -55,9 +56,37 @@ function App() {
         setFilteredLinks(sorted);
     };
 
+    // ✅ Fonction pour filtrer par recherche
+    const handleSearch = (query) => {
+        setSearchQuery(query);
+        const lowerQuery = query.toLowerCase();
+        
+        const results = links.filter(link =>
+            link.url.toLowerCase().includes(lowerQuery) || 
+            link.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+        );
+
+        setFilteredLinks(results);
+    };
+
     return (
         <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
             <h1>📌 Liens sauvegardés</h1>
+
+            {/* 🔹 Champ de recherche */}
+            <input 
+                type="text" 
+                placeholder="🔍 Rechercher un lien ou un tag..." 
+                value={searchQuery} 
+                onChange={(e) => handleSearch(e.target.value)}
+                style={{
+                    width: "100%",
+                    padding: "10px",
+                    marginBottom: "15px",
+                    borderRadius: "5px",
+                    border: "1px solid #ddd"
+                }}
+            />
 
             {/* 🔹 Filtre par tags */}
             <div style={{ marginBottom: "15px" }}>
