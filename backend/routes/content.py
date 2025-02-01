@@ -71,6 +71,7 @@ def export_data():
     
 # 🔹 Route pour générer un résumé avec OpenAI GPT (ou autre LLM)
 @content_bp.route('/summarize', methods=['POST'])
+@cross_origin()  # ✅ Active CORS pour cette route
 def summarize():
     data = request.json
     url = data.get("url")
@@ -107,6 +108,7 @@ content_bp = Blueprint('content', __name__)
 
 # 🔹 Route pour classifier un lien automatiquement
 @content_bp.route('/classify', methods=['POST'])
+@cross_origin()  # ✅ Active CORS pour cette route
 def classify():
     data = request.json
     url = data.get("url")
