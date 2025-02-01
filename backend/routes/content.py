@@ -102,3 +102,53 @@ def summarize():
         return jsonify({"url": url, "summary": summary})
     else:
         return jsonify({"error": "Impossible de générer le résumé"}), 500
+        
+content_bp = Blueprint('content', __name__)
+
+# 🔹 Route pour classifier un lien automatiquement
+@content_bp.route('/classify', methods=['POST'])
+def classify():
+    data = request.json
+    url = data.get("url")
+
+    if not url:
+        return jsonify({"error": "URL manquante"}), 400
+
+    API_KEY = os.getenv("OPENAI_API_KEY")
+    API_URL = "https://api.openai.com/v1/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    prompt = f"""
+    L'URL suivante contient un article ou une page web. 
+    Attribue une **seule** catégorie pertinente parmi : 
+    - Technologie
+    - Science
+    - Finance
+    - Santé
+    - Sport
+    - Divertissement
+    - Éducation
+    - Autre
+
+    Lien : {url}
+
+    Retourne **seulement le nom de la catégorie** sans autre texte.
+    """
+
+    payload = {
+        "model": "gpt-3.5-turbo",
+        "messages": [{"role": "system", "content": prompt}],
+        "temperature": 0.7,
+    }
+
+    response = requests.post(API_URL, headers=headers, json=payload)
+
+    if response.status_code == 200:
+        category = response.json()["choices"][0]["message"]["content"]
+        return jsonify({"url": url, "category": category.strip()})
+    else:
+        return jsonify({"error": "Impossible de classifier"}), 500 

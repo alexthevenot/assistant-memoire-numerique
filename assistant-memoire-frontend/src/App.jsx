@@ -12,26 +12,32 @@ function App() {
     const [searchQuery, setSearchQuery] = useState("");
     const [summaries, setSummaries] = useState({});
     const [loadingSummary, setLoadingSummary] = useState({});
+	const [categories, setCategories] = useState({});
 
-    useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await axios.get(`${API_URL}/data`);
-                setLinks(response.data);
-                setFilteredLinks(response.data);
+	useEffect(() => {
+		async function fetchData() {
+			try {
+				const response = await axios.get(`${API_URL}/data`);
+				setLinks(response.data);
+				setFilteredLinks(response.data);
 
-                // 🔹 Extraire tous les tags uniques
-                const allTags = new Set();
-                response.data.forEach(link => {
-                    link.tags.forEach(tag => allTags.add(tag));
-                });
-                setTags(Array.from(allTags));
-            } catch (error) {
-                console.error("Erreur lors du chargement des liens :", error);
-            }
-        }
-        fetchData();
-    }, []);
+				// 🔹 Extraire toutes les tags et catégories uniques
+				const allTags = new Set();
+				const allCategories = {};
+
+				response.data.forEach(link => {
+					link.tags.forEach(tag => allTags.add(tag));
+					allCategories[link.url] = link.category || "Non classé";
+				});
+
+				setTags(Array.from(allTags));
+				setCategories(allCategories);
+			} catch (error) {
+				console.error("Erreur lors du chargement des liens :", error);
+			}
+		}
+		fetchData();
+	}, []);
 
     // ✅ Fonction pour filtrer les liens par tag
     const filterByTag = (tag) => {
@@ -83,6 +89,16 @@ function App() {
         }
         setLoadingSummary(prev => ({ ...prev, [url]: false }));
     };
+	
+	const classifyLink = async (url) => {
+		try {
+			const response = await axios.post(`${API_URL}/classify`, { url });
+			setCategories(prev => ({ ...prev, [url]: response.data.category }));
+		} catch (error) {
+			console.error("Erreur de classification :", error);
+		}
+	};
+
 
     return (
         <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
@@ -163,6 +179,18 @@ function App() {
                                 {summaries[link.url]}
                             </p>
                         )}
+						
+						{/* 🔹 Bouton pour classifier */}
+						<button 
+							onClick={() => classifyLink(link.url)} 
+							style={{ padding: "5px", margin: "5px", cursor: "pointer" }}
+						>
+							📂 Classifier
+						</button>
+
+						{/* 🔹 Affichage de la catégorie */}
+						<p><strong>Catégorie :</strong> {categories[link.url] || "Non classé"}</p>
+
                     </li>
                 ))}
             </ul>
