@@ -1,65 +1,113 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const API_URL = "https://assistant-memoire-numerique.onrender.com/data"; // Remplace par ton API
+const API_URL = "https://assistant-memoire-numerique.onrender.com/data";
 
 function App() {
-  const [data, setData] = useState([]);
-  const [search, setSearch] = useState(""); // 🔎 État pour la recherche
+    const [links, setLinks] = useState([]);
+    const [filteredLinks, setFilteredLinks] = useState([]);
+    const [tags, setTags] = useState([]);
+    const [selectedTag, setSelectedTag] = useState(null);
+    const [sortOrder, setSortOrder] = useState("date-desc");
 
-  // Charger les données depuis l'API
-  useEffect(() => {
-    axios.get(API_URL)
-      .then(response => setData(response.data))
-      .catch(error => console.error("Erreur lors du chargement des données:", error));
-  }, []);
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const response = await axios.get(API_URL);
+                setLinks(response.data);
+                setFilteredLinks(response.data);
 
-  // Filtrer les résultats selon la recherche
-  const filteredData = data.filter(item =>
-    item.url.toLowerCase().includes(search.toLowerCase()) || 
-    item.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
-  );
+                // 🔹 Extraire tous les tags uniques
+                const allTags = new Set();
+                response.data.forEach(link => {
+                    link.tags.forEach(tag => allTags.add(tag));
+                });
+                setTags(Array.from(allTags));
+            } catch (error) {
+                console.error("Erreur lors du chargement des liens :", error);
+            }
+        }
+        fetchData();
+    }, []);
 
-  return (
-    <div style={{ maxWidth: "600px", margin: "20px auto", fontFamily: "Arial" }}>
-      <h1>📚 Assistant Mémoire</h1>
+    // ✅ Fonction pour filtrer les liens par tag
+    const filterByTag = (tag) => {
+        if (selectedTag === tag) {
+            setSelectedTag(null);
+            setFilteredLinks(links);
+        } else {
+            setSelectedTag(tag);
+            setFilteredLinks(links.filter(link => link.tags.includes(tag)));
+        }
+    };
 
-      {/* 🔎 Barre de recherche */}
-      <input
-        type="text"
-        placeholder="Rechercher par URL ou tag..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "10px",
-          fontSize: "16px",
-          marginBottom: "20px",
-          borderRadius: "5px",
-          border: "1px solid #ccc"
-        }}
-      />
+    // ✅ Fonction pour trier les liens
+    const sortLinks = (order) => {
+        setSortOrder(order);
+        const sorted = [...filteredLinks].sort((a, b) => {
+            if (order === "date-desc") {
+                return b.id - a.id; // Du plus récent au plus ancien
+            } else if (order === "date-asc") {
+                return a.id - b.id; // Du plus ancien au plus récent
+            }
+            return 0;
+        });
+        setFilteredLinks(sorted);
+    };
 
-      {/* 📌 Liste filtrée des liens */}
-      <ul style={{ listStyleType: "none", padding: 0 }}>
-        {filteredData.length > 0 ? (
-          filteredData.map((item) => (
-            <li key={item.id} style={{ marginBottom: "15px", padding: "10px", borderBottom: "1px solid #eee" }}>
-              <a href={item.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "18px", fontWeight: "bold" }}>
-                {item.url}
-              </a>
-              <br />
-              <span style={{ color: "#666", fontSize: "14px" }}>
-                <strong>Tags :</strong> {item.tags.join(", ")}
-              </span>
-            </li>
-          ))
-        ) : (
-          <p>Aucun résultat trouvé.</p>
-        )}
-      </ul>
-    </div>
-  );
+    return (
+        <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+            <h1>📌 Liens sauvegardés</h1>
+
+            {/* 🔹 Filtre par tags */}
+            <div style={{ marginBottom: "15px" }}>
+                <strong>Filtrer par tag :</strong>
+                {tags.map(tag => (
+                    <button
+                        key={tag}
+                        onClick={() => filterByTag(tag)}
+                        style={{
+                            margin: "5px",
+                            padding: "5px 10px",
+                            cursor: "pointer",
+                            backgroundColor: selectedTag === tag ? "#007bff" : "#ddd",
+                            color: selectedTag === tag ? "#fff" : "#000",
+                            borderRadius: "5px",
+                            border: "none",
+                        }}
+                    >
+                        {tag}
+                    </button>
+                ))}
+            </div>
+
+            {/* 🔹 Tri des liens */}
+            <div style={{ marginBottom: "15px" }}>
+                <label htmlFor="sort">Trier par :</label>
+                <select
+                    id="sort"
+                    value={sortOrder}
+                    onChange={(e) => sortLinks(e.target.value)}
+                    style={{ marginLeft: "10px", padding: "5px" }}
+                >
+                    <option value="date-desc">📅 Plus récent</option>
+                    <option value="date-asc">📅 Plus ancien</option>
+                </select>
+            </div>
+
+            {/* 🔹 Affichage des liens filtrés et triés */}
+            <ul>
+                {filteredLinks.map(link => (
+                    <li key={link.id} style={{ marginBottom: "10px" }}>
+                        <a href={link.url} target="_blank" rel="noopener noreferrer">
+                            {link.url}
+                        </a>
+                        <p><strong>Tags:</strong> {link.tags.join(", ")}</p>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 }
 
 export default App;
