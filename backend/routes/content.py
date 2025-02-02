@@ -104,8 +104,6 @@ def summarize():
     else:
         return jsonify({"error": "Impossible de générer le résumé"}), 500
         
-content_bp = Blueprint('content', __name__)
-
 # 🔹 Route pour classifier un lien automatiquement
 @content_bp.route('/classify', methods=['POST'])
 @cross_origin()  # ✅ Active CORS pour cette route
