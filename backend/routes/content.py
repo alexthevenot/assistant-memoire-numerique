@@ -107,20 +107,15 @@ def summarize():
 # 🔹 Route pour classifier un lien automatiquement
 @content_bp.route('/classify', methods=['POST'])
 @cross_origin()  # ✅ Active CORS pour cette route
-def classify():
-    data = request.json
-    url = data.get("url")
-
-    if not url:
-        return jsonify({"error": "URL manquante"}), 400
+def classify_url(url):
+    try:
+        response = requests.get(url, timeout=5)
+        text = response.text[:2000]  # Extraction limitée à 2000 caractères
+    except requests.exceptions.RequestException:
+        text = None  # Si l’extraction échoue, on laisse à l’IA le soin de deviner
 
     API_KEY = os.getenv("OPENAI_API_KEY")
     API_URL = "https://api.openai.com/v1/chat/completions"
-
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type": "application/json",
-    }
 
     prompt = f"""
     L'URL suivante contient un article ou une page web. 
@@ -136,8 +131,15 @@ def classify():
 
     Lien : {url}
 
+    {f"Extrait du contenu: {text}" if text else ""}
+    
     Retourne **seulement le nom de la catégorie** sans autre texte.
     """
+
+    headers = {
+        "Authorization": f"Bearer {API_KEY}",
+        "Content-Type": "application/json",
+    }
 
     payload = {
         "model": "gpt-3.5-turbo",
@@ -149,6 +151,6 @@ def classify():
 
     if response.status_code == 200:
         category = response.json()["choices"][0]["message"]["content"]
-        return jsonify({"url": url, "category": category.strip()})
+        return category.strip()
     else:
-        return jsonify({"error": "Impossible de classifier"}), 500 
+        return "Indéterminé"

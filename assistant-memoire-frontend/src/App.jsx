@@ -6,6 +6,7 @@ import LinkGrid from "./components/LinkGrid";
 import "react-icons/fi";
 
 const API_URL = "https://assistant-memoire-numerique.onrender.com/data";
+const CLASSIFY_URL = "https://assistant-memoire-numerique.onrender.com/classify";
 
 const App = () => {
     const [links, setLinks] = useState([]);
@@ -48,6 +49,15 @@ const App = () => {
         }
     };
 
+    const classifyLink = async (url) => {
+        try {
+            const response = await axios.post(CLASSIFY_URL, { url });
+            alert(`Catégorie assignée : ${response.data.category}`);
+        } catch (error) {
+            console.error("Erreur lors de la classification :", error);
+        }
+    };
+
     return (
         <div style={{ display: "flex", height: "100vh", backgroundColor: isDarkMode ? "#1e1e1e" : "#f8f9fa", color: isDarkMode ? "#fff" : "#000", transition: "background 0.3s" }}>
             <Sidebar categories={categories} tags={tags} onFilter={handleFilter} />
@@ -56,7 +66,7 @@ const App = () => {
                 <button onClick={() => setIsDarkMode(!isDarkMode)} style={{ margin: "10px", padding: "8px 12px", borderRadius: "5px", cursor: "pointer", background: "#007bff", color: "white", border: "none", fontSize: "16px" }}>
                     {isDarkMode ? "☀️ Mode Clair" : "🌙 Mode Sombre"}
                 </button>
-                <LinkGrid links={filteredLinks} />
+                <LinkGrid links={filteredLinks} onClassify={classifyLink} />
             </div>
         </div>
     );
