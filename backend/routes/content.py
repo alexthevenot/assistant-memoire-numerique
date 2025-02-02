@@ -107,12 +107,12 @@ def summarize():
 # 🔹 Route pour classifier un lien automatiquement
 @content_bp.route('/classify', methods=['POST'])
 @cross_origin()  # ✅ Active CORS pour cette route
-def classify_url(url):
-    try:
-        response = requests.get(url, timeout=5)
-        text = response.text[:2000]  # Extraction limitée à 2000 caractères
-    except requests.exceptions.RequestException:
-        text = None  # Si l’extraction échoue, on laisse à l’IA le soin de deviner
+def classify_url():
+    data = request.json
+    url = data.get("url")
+
+    if not url:
+        return jsonify({"error": "URL manquante"}), 400
 
     API_KEY = os.getenv("OPENAI_API_KEY")
     API_URL = "https://api.openai.com/v1/chat/completions"
